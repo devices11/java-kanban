@@ -1,4 +1,4 @@
-package client;
+package service;
 
 import models.Epic;
 import models.Subtask;
@@ -6,6 +6,7 @@ import models.Task;
 import util.StatusModel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class TaskManager {
@@ -54,32 +55,36 @@ public class TaskManager {
     }
 
     //Получить весь список задач
-    public HashMap<Integer, Task> getAllTask() {
-        return taskStorage;
+    public Collection<Task> getAllTask() {
+        return taskStorage.values();
     }
 
-    public HashMap<Integer, Epic> getAllEpic() {
-        return epicStorage;
+    public Collection<Epic> getAllEpic() {
+        return epicStorage.values();
     }
 
-    public HashMap<Integer, Subtask> getAllSubtask() {
-        return subtaskStorage;
+    public Collection<Subtask> getAllSubtask() {
+        return subtaskStorage.values();
     }
 
     //Обновить задачу
     public void updateTask(Task task) {
-        taskStorage.put(task.getId(), task);
+        if  (taskStorage.containsKey(task.getId())) {
+            taskStorage.put(task.getId(), task);
+        }
     }
 
     public void updateEpic(Epic epic) {
-        Epic updatedEpic = checkUpdateEpicStatus(epic);
-        epicStorage.put(updatedEpic.getId(), epic);
+        if (epicStorage.containsKey(epic.getId())) {
+            checkUpdateEpicStatus(epic);
+        }
     }
 
     public void updateSubtask(Subtask subtask) {
-        subtaskStorage.put(subtask.getId(), subtask);
-        Epic updatedEpic = checkUpdateEpicStatus(getEpicById(subtask.getEpicId()));
-        epicStorage.put(updatedEpic.getId(), updatedEpic);
+        if (subtaskStorage.containsKey(subtask.getId())) {
+            subtaskStorage.put(subtask.getId(), subtask);
+            checkUpdateEpicStatus(getEpicById(subtask.getEpicId()));
+        }
     }
 
     //Удалить все задачи
@@ -97,16 +102,10 @@ public class TaskManager {
 
         for (int epicId : epicStorage.keySet()) {
             Epic epic = getEpicById(epicId);
-            if (!epicStorage.get(epicId).getStatus().equals(StatusModel.DONE)) {
-                epic.setStatus(StatusModel.NEW);
-                epic.deleteAllSubtask();
-                epicStorage.put(epicId, epic);
-            } else {
-                epic.deleteAllSubtask();
-            }
+            epic.deleteAllSubtask();
+            checkUpdateEpicStatus(epic);
         }
     }
-
 
     //Удалить задачу по id
     public void deleteTaskById(int id) {
@@ -114,12 +113,11 @@ public class TaskManager {
     }
 
     public void deleteEpicById(int id) {
-        ArrayList<Integer> subtaskIds = getAllSubtaskInEpic(id);
+        ArrayList<Integer> subtasks = epicStorage.get(id).getSubtasks();
         epicStorage.remove(id);
-        for (int subtaskId : subtaskIds) {
-            deleteSubtaskById(subtaskId);
+        for (int subtaskId : subtasks) {
+            subtaskStorage.remove(subtaskId);
         }
-
     }
 
     public void deleteSubtaskById(int id) {
@@ -127,37 +125,39 @@ public class TaskManager {
         subtaskStorage.remove(id);
         if (epic != null) {
             epic.deleteSubtaskId(id);
-            Epic updatedEpic = checkUpdateEpicStatus(epic);
-            epicStorage.put(updatedEpic.getId(), updatedEpic);
+            checkUpdateEpicStatus(epic);
         }
     }
 
     //Получить список всех подзадач определённого эпика.
-    public ArrayList<Integer> getAllSubtaskInEpic(Integer epicId) {
-        return epicStorage.get(epicId).getSubtasks();
+    public ArrayList<Subtask> getAllSubtaskInEpic(Integer epicId) {
+        ArrayList<Subtask> subtasks = new ArrayList<>();
+        for (Integer subtaskId : epicStorage.get(epicId).getSubtasks()) {
+            subtasks.add(getSubtaskById(subtaskId));
+        }
+        return subtasks;
     }
 
     //Проверить и обновить статус эпика в зависимости от статуса подзадач. Пользователю не доступен.
-    private Epic checkUpdateEpicStatus(Epic epic) {
+    private void checkUpdateEpicStatus(Epic epic) {
         if (epic.getSubtasks().isEmpty() && !epic.getStatus().equals(StatusModel.DONE)) {
             epic.setStatus(StatusModel.NEW);
-            return epic;
+            return;
         }
 
-        ArrayList<Integer> subtasks = getAllSubtaskInEpic(epic.getId());
+        ArrayList<Subtask> subtasks = getAllSubtaskInEpic(epic.getId());
 
-        for (Integer subtaskId : subtasks) {
-            StatusModel status = subtaskStorage.get(subtaskId).getStatus();
+        for (Subtask subtask : subtasks) {
+            StatusModel status = subtaskStorage.get(subtask.getId()).getStatus();
             if (status.equals(StatusModel.NEW)) {
                 epic.setStatus(StatusModel.NEW);
             } else if (status.equals(StatusModel.IN_PROGRESS)) {
                 epic.setStatus(StatusModel.IN_PROGRESS);
-                return epic;
+                return;
             }
         }
 
         epic.setStatus(StatusModel.DONE);
-        return epic;
     }
 
 }
