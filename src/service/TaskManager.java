@@ -113,10 +113,13 @@ public class TaskManager {
     }
 
     public void deleteEpicById(int id) {
-        ArrayList<Integer> subtasks = epicStorage.get(id).getSubtasks();
-        epicStorage.remove(id);
-        for (int subtaskId : subtasks) {
-            subtaskStorage.remove(subtaskId);
+        Epic epic = epicStorage.get(id);
+        if (epic != null) {
+            ArrayList<Integer> subtasks = epic.getSubtasks();
+            epicStorage.remove(id);
+            for (int subtaskId : subtasks) {
+                subtaskStorage.remove(subtaskId);
+            }
         }
     }
 
@@ -132,8 +135,11 @@ public class TaskManager {
     //Получить список всех подзадач определённого эпика.
     public ArrayList<Subtask> getAllSubtaskInEpic(Integer epicId) {
         ArrayList<Subtask> subtasks = new ArrayList<>();
-        for (Integer subtaskId : epicStorage.get(epicId).getSubtasks()) {
-            subtasks.add(getSubtaskById(subtaskId));
+        Epic epic = epicStorage.get(epicId);
+        if (epic != null) {
+            for (Integer subtaskId : epic.getSubtasks()) {
+                subtasks.add(getSubtaskById(subtaskId));
+            }
         }
         return subtasks;
     }
