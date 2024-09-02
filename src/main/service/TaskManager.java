@@ -6,6 +6,7 @@ import main.models.Task;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public interface TaskManager {
 
@@ -47,4 +48,5 @@ public interface TaskManager {
 
     void deleteSubtaskById(int id);
 
+    List<Task> getHistory();
 }

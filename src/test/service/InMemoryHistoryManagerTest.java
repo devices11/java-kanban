@@ -3,8 +3,6 @@ package test.service;
 import main.models.Epic;
 import main.models.Subtask;
 import main.models.Task;
-import main.service.HistoryManager;
-import main.service.InMemoryTaskManager;
 import main.service.Managers;
 import main.service.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InMemoryHistoryManagerTest {
     private TaskManager taskManager;
-    private HistoryManager historyManager;
 
     @BeforeEach
     public void beforeEach() {
         taskManager = Managers.getDefault();
-        historyManager = ((InMemoryTaskManager) taskManager).getHistoryManager();
 
         Task task1 = new Task("Название таски 1", "Описание таски 1");
         taskManager.createTask(task1);
@@ -35,7 +31,15 @@ public class InMemoryHistoryManagerTest {
     @Test
     public void add1TaskInHistory() {
         taskManager.getTaskById(1);
-        assertEquals(1, historyManager.getHistory().size(), "В истории не 1 объект");
+        assertEquals(1, taskManager.getHistory().size(), "В истории не 1 объект");
+    }
+
+    @Test
+    public void viewNonExistentTask() {
+        taskManager.getTaskById(1);
+        taskManager.getTaskById(111);
+        assertEquals(1, taskManager.getHistory().size(), "В истории не 1 объект");
+        assertEquals(1, taskManager.getHistory().getFirst().getId(), "id не совпадает");
     }
 
     @Test
@@ -45,11 +49,11 @@ public class InMemoryHistoryManagerTest {
         taskForUpdate.setId(1);
         taskManager.updateTask(taskForUpdate);
         taskManager.getTaskById(1);
-        assertEquals(2, historyManager.getHistory().size(), "В истории не 2 объекта");
-        assertEquals("Название таски 1", historyManager.getHistory().getFirst().getTitle());
-        assertEquals("Описание таски 1", historyManager.getHistory().getFirst().getDescription());
-        assertEquals("Название таски 2", historyManager.getHistory().get(1).getTitle());
-        assertEquals("Описание таски 2", historyManager.getHistory().get(1).getDescription());
+        assertEquals(2, taskManager.getHistory().size(), "В истории не 2 объекта");
+        assertEquals("Название таски 1", taskManager.getHistory().getFirst().getTitle());
+        assertEquals("Описание таски 1", taskManager.getHistory().getFirst().getDescription());
+        assertEquals("Название таски 2", taskManager.getHistory().get(1).getTitle());
+        assertEquals("Описание таски 2", taskManager.getHistory().get(1).getDescription());
     }
 
     @Test
@@ -66,7 +70,7 @@ public class InMemoryHistoryManagerTest {
         taskManager.getSubtaskById(3);
         taskManager.getSubtaskById(3);
 
-        assertEquals(10, historyManager.getHistory().size(), "В истории не 10 объектов");
+        assertEquals(10, taskManager.getHistory().size(), "В истории не 10 объектов");
     }
 
     @Test
@@ -84,11 +88,11 @@ public class InMemoryHistoryManagerTest {
         taskManager.getEpicById(2);
         taskManager.getSubtaskById(3);
 
-        assertEquals(10, historyManager.getHistory().size(),
+        assertEquals(10, taskManager.getHistory().size(),
                 "В истории не 10 объектов");
-        assertEquals(1, historyManager.getHistory().getFirst().getId(),
+        assertEquals(1, taskManager.getHistory().getFirst().getId(),
                 "Первый не с id = 1");
-        assertEquals(3, historyManager.getHistory().get(9).getId(),
+        assertEquals(3, taskManager.getHistory().get(9).getId(),
                 "Десятый объект в истории не с id = 3");
     }
 }
