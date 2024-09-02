@@ -39,6 +39,20 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
+    public void taskInHistoryAllVersion() {
+        taskManager.getTaskById(1);
+        Task taskForUpdate = new Task("Название таски 2", "Описание таски 2");
+        taskForUpdate.setId(1);
+        taskManager.updateTask(taskForUpdate);
+        taskManager.getTaskById(1);
+        assertEquals(2, historyManager.getHistory().size(), "В истории не 2 объекта");
+        assertEquals("Название таски 1", historyManager.getHistory().getFirst().getTitle());
+        assertEquals("Описание таски 1", historyManager.getHistory().getFirst().getDescription());
+        assertEquals("Название таски 2", historyManager.getHistory().get(1).getTitle());
+        assertEquals("Описание таски 2", historyManager.getHistory().get(1).getDescription());
+    }
+
+    @Test
     public void add10TaskInHistory() {
         //Посмотрели 10 объектов
         taskManager.getTaskById(1);
