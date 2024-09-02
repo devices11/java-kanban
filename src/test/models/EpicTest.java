@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EpicTest {
     private Epic epic1;
@@ -44,7 +45,7 @@ class EpicTest {
         epic1.setSubtasks(13);
         epic1.setSubtasks(14);
         epic1.deleteSubtaskId(13);
-        assertArrayEquals(list.toArray(), epic1.getSubtasks().toArray());
+        assertEquals(list, epic1.getSubtasks());
     }
 
     @Test
