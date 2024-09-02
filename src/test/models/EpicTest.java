@@ -49,12 +49,11 @@ class EpicTest {
 
     @Test
     void deleteAllSubtask() {
-        ArrayList<Integer> list = new ArrayList<>();
         epic1.setSubtasks(12);
         epic1.setSubtasks(13);
         epic1.setSubtasks(14);
         epic1.deleteAllSubtask();
-        assertArrayEquals(list.toArray(), epic1.getSubtasks().toArray());
+        assertEquals(0, epic1.getSubtasks().size());
     }
 
     @Test

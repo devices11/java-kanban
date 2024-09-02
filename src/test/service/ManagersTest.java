@@ -11,13 +11,13 @@ class ManagersTest {
 
     @Test
     void getDefault() {
-        assertTrue(Managers.getDefault() != null);
-        assertTrue(Managers.getDefault() instanceof InMemoryTaskManager);
+        assertNotNull(Managers.getDefault());
+        assertInstanceOf(InMemoryTaskManager.class, Managers.getDefault());
     }
 
     @Test
     void getDefaultHistory() {
-        assertTrue(Managers.getDefaultHistory() != null);
-        assertTrue(Managers.getDefaultHistory() instanceof InMemoryHistoryManager);
+        assertNotNull(Managers.getDefaultHistory());
+        assertInstanceOf(InMemoryHistoryManager.class, Managers.getDefaultHistory());
     }
 }

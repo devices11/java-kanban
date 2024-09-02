@@ -33,7 +33,7 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void add1TaskInHistory() {;
+    public void add1TaskInHistory() {
         taskManager.getTaskById(1);
         assertEquals(1, historyManager.getHistory().size(), "В истории не 1 объект");
     }
