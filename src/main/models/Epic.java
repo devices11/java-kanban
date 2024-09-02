@@ -1,4 +1,4 @@
-package models;
+package main.models;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,7 @@ public class Epic extends Task {
         this.subtasks = new ArrayList<>();
     }
 
-    public void setSubtasks(int subtaskId) {
+    public void  setSubtasks(int subtaskId) {
         subtasks.add(subtaskId);
     }
 

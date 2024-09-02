@@ -1,6 +1,6 @@
-package models;
+package main.models;
 
-import util.StatusModel;
+import main.util.StatusModel;
 
 import java.util.Objects;
 
@@ -52,7 +52,10 @@ public class Task {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Task task)) return false;
-        return id == task.id && Objects.equals(title, task.title) && Objects.equals(description, task.description) && status == task.status;
+        return id == task.id
+                && Objects.equals(title, task.title)
+                && Objects.equals(description, task.description)
+                && status == task.status;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package util;
+package main.util;
 
 public enum StatusModel {
     NEW,
