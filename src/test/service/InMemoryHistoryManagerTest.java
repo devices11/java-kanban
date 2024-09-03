@@ -77,7 +77,29 @@ public class InMemoryHistoryManagerTest {
 
         assertEquals(10, historyManager.getHistory().size(),"В истории не 10 объектов");
         assertInstanceOf(Epic.class, historyManager.getHistory().getFirst(), "Первый объект не Epic");
-        assertInstanceOf(Epic.class, historyManager.getHistory().getFirst());
         assertInstanceOf(Task.class, historyManager.getHistory().get(9),"Десятый объект не Task");
+    }
+
+    @Test
+    public void checkLimit10TaskInHistoryViewTaskNull() {
+        Task task = null;
+        //Посмотрели 11 объектов
+        historyManager.add(task);
+        historyManager.add(task1);
+        historyManager.add(epic1);
+        historyManager.add(task1);
+        historyManager.add(task1);
+        historyManager.add(task);
+        historyManager.add(task1);
+        historyManager.add(task1);
+        historyManager.add(task1);
+        historyManager.add(task1);
+        historyManager.add(epic1);
+        historyManager.add(subtask1);
+        historyManager.add(task);
+
+        assertEquals(10, historyManager.getHistory().size(),"В истории не 10 объектов");
+        assertInstanceOf(Task.class, historyManager.getHistory().getFirst(), "Первый объект не Task");
+        assertInstanceOf(Subtask.class, historyManager.getHistory().get(9),"Десятый объект не Subtask");
     }
 }
