@@ -17,11 +17,11 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Subtask> subtaskStorage;
     private int newId = 1;
 
-    public InMemoryTaskManager() {
-        historyManager = Managers.getDefaultHistory();
-        taskStorage = new HashMap<>();
-        epicStorage = new HashMap<>();
-        subtaskStorage = new HashMap<>();
+    public InMemoryTaskManager(HistoryManager historyManager) {
+        this.historyManager = historyManager;
+        this.taskStorage = new HashMap<>();
+        this.epicStorage = new HashMap<>();
+        this.subtaskStorage = new HashMap<>();
     }
 
     //Создать задачу

@@ -1,4 +1,4 @@
-package test.service;
+package service;
 
 import main.service.InMemoryHistoryManager;
 import main.service.InMemoryTaskManager;

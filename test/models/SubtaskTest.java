@@ -1,4 +1,4 @@
-package test.models;
+package models;
 
 import main.models.Subtask;
 import org.junit.jupiter.api.BeforeEach;

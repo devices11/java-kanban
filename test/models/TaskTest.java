@@ -1,4 +1,4 @@
-package test.models;
+package models;
 
 import main.models.Task;
 import main.util.StatusModel;
