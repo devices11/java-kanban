@@ -114,17 +114,29 @@ public class InMemoryTaskManager implements TaskManager {
     //Удалить все задачи
     @Override
     public void deleteAllTask() {
+        for (int taskId : taskStorage.keySet()) {
+            historyManager.remove(taskId);
+        }
         taskStorage.clear();
     }
 
     @Override
     public void deleteAllEpic() {
+        for (int epicId : epicStorage.keySet()) {
+            historyManager.remove(epicId);
+        }
+        for (int subtaskId : subtaskStorage.keySet()) {
+            historyManager.remove(subtaskId);
+        }
         epicStorage.clear();
         subtaskStorage.clear();
     }
 
     @Override
     public void deleteAllSubtask() {
+        for (int subtaskId : subtaskStorage.keySet()) {
+            historyManager.remove(subtaskId);
+        }
         subtaskStorage.clear();
 
         for (int epicId : epicStorage.keySet()) {
@@ -138,6 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTaskById(int id) {
         taskStorage.remove(id);
+        historyManager.remove(id);
     }
 
     @Override
@@ -148,7 +161,9 @@ public class InMemoryTaskManager implements TaskManager {
             epicStorage.remove(id);
             for (int subtaskId : subtasks) {
                 subtaskStorage.remove(subtaskId);
+                historyManager.remove(subtaskId);
             }
+            historyManager.remove(id);
         }
     }
 
@@ -160,6 +175,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.deleteSubtaskId(id);
             checkUpdateEpicStatus(epic);
         }
+        historyManager.remove(id);
     }
 
     //Получить список всех подзадач определённого эпика.

@@ -88,7 +88,8 @@ class InMemoryTaskManagerTest {
         Task taskForUpdate = new Task("Название таски 2", "Описание таски 2");
         taskForUpdate.setId(1);
         taskManager.updateTask(taskForUpdate);
-        assertEquals(taskForUpdate, taskManager.getTaskById(1), "Задача не обновлена");
+        assertEquals(taskForUpdate.getTitle(), taskManager.getTaskById(1).getTitle(), "Задача не обновлена");
+        assertEquals(taskForUpdate.getDescription(), taskManager.getTaskById(1).getDescription(), "Задача не обновлена");
     }
 
     @Test
@@ -96,7 +97,8 @@ class InMemoryTaskManagerTest {
         Task taskForUpdate = new Task("Название таски 2", "Описание таски 2");
         taskForUpdate.setId(2);
         taskManager.updateTask(taskForUpdate);
-        assertEquals(task1, taskManager.getTaskById(1), "Задача не должна быть изменена");
+        assertEquals(task1.getTitle(), taskManager.getTaskById(1).getTitle(), "Задача не должна быть изменена");
+        assertEquals(task1.getDescription(), taskManager.getTaskById(1).getDescription(), "Задача не должна быть изменена");
         assertEquals(1, taskManager.getAllTask().size(), "Неверное количество задач");
     }
 
@@ -106,7 +108,8 @@ class InMemoryTaskManagerTest {
         epicForUpdate.setId(2);
         epicForUpdate.setSubtasks(3);
         taskManager.updateEpic(epicForUpdate);
-        assertEquals(epicForUpdate, taskManager.getEpicById(2), "Задача не обновлена");
+        assertEquals(epicForUpdate.getTitle(), taskManager.getEpicById(2).getTitle(), "Задача не обновлена");
+        assertEquals(epicForUpdate.getDescription(), taskManager.getEpicById(2).getDescription(), "Задача не обновлена");
         assertEquals(StatusModel.NEW, taskManager.getEpicById(2).getStatus(), "Статус не должен меняться");
     }
 
@@ -120,7 +123,8 @@ class InMemoryTaskManagerTest {
         epicForUpdate.setSubtasks(3);
         epicForUpdate.setSubtasks(4);
         taskManager.updateEpic(epicForUpdate);
-        assertEquals(epicForUpdate, taskManager.getEpicById(2), "Задача не обновлена");
+        assertEquals(epicForUpdate.getTitle(), taskManager.getEpicById(2).getTitle(), "Задача не обновлена");
+        assertEquals(epicForUpdate.getDescription(), taskManager.getEpicById(2).getDescription(), "Задача не обновлена");
         assertEquals(StatusModel.IN_PROGRESS, taskManager.getEpicById(2).getStatus(), "Статус некорректный");
     }
 
@@ -131,7 +135,8 @@ class InMemoryTaskManagerTest {
         epicForUpdate.setSubtasks(3);
         epicForUpdate.setStatus(StatusModel.DONE);
         taskManager.updateEpic(epicForUpdate);
-        assertEquals(epicForUpdate, taskManager.getEpicById(2), "Задача не обновлена");
+        assertEquals(epicForUpdate.getTitle(), taskManager.getEpicById(2).getTitle(), "Задача не обновлена");
+        assertEquals(epicForUpdate.getDescription(), taskManager.getEpicById(2).getDescription(), "Задача не обновлена");
         assertEquals(StatusModel.NEW, taskManager.getEpicById(2).getStatus(), "Статус не должен меняться");
     }
 
@@ -141,7 +146,8 @@ class InMemoryTaskManagerTest {
         subtaskForUpdate.setId(3);
         subtaskForUpdate.setStatus(StatusModel.DONE);
         taskManager.updateSubtask(subtaskForUpdate);
-        assertEquals(subtaskForUpdate, taskManager.getSubtaskById(3), "Задача не обновлена");
+        assertEquals(subtaskForUpdate.getTitle(), taskManager.getSubtaskById(3).getTitle(), "Задача не обновлена");
+        assertEquals(subtaskForUpdate.getDescription(), taskManager.getSubtaskById(3).getDescription(), "Задача не обновлена");
         assertEquals(StatusModel.DONE, taskManager.getSubtaskById(3).getStatus(),
                 "Статус сабтаски не изменился");
         assertEquals(StatusModel.DONE, taskManager.getEpicById(2).getStatus(), "Статус эпика не изменился");
@@ -152,7 +158,8 @@ class InMemoryTaskManagerTest {
         Subtask subtaskForUpdate = new Subtask("Название сабтаски 2", "Описание сабтаски 2", 2);
         subtaskForUpdate.setId(3);
         taskManager.updateSubtask(subtaskForUpdate);
-        assertEquals(subtaskForUpdate, taskManager.getSubtaskById(3), "Задача не обновлена");
+        assertEquals(subtaskForUpdate.getTitle(), taskManager.getSubtaskById(3).getTitle(), "Задача не обновлена");
+        assertEquals(subtaskForUpdate.getDescription(), taskManager.getSubtaskById(3).getDescription(), "Задача не обновлена");
     }
 
     @Test
@@ -161,7 +168,8 @@ class InMemoryTaskManagerTest {
         subtaskForUpdate.setId(3);
         subtaskForUpdate.setStatus(StatusModel.IN_PROGRESS);
         taskManager.updateSubtask(subtaskForUpdate);
-        assertEquals(subtaskForUpdate, taskManager.getSubtaskById(3), "Задача не обновлена");
+        assertEquals(subtaskForUpdate.getTitle(), taskManager.getSubtaskById(3).getTitle(), "Задача не обновлена");
+        assertEquals(subtaskForUpdate.getDescription(), taskManager.getSubtaskById(3).getDescription(), "Задача не обновлена");
         assertEquals(StatusModel.IN_PROGRESS, taskManager.getSubtaskById(3).getStatus(),
                 "Статус сабтаски не изменился");
         assertEquals(StatusModel.IN_PROGRESS, taskManager.getEpicById(2).getStatus(),

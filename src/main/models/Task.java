@@ -52,10 +52,7 @@ public class Task {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Task task)) return false;
-        return id == task.id
-                && Objects.equals(title, task.title)
-                && Objects.equals(description, task.description)
-                && status == task.status;
+        return id == task.id;
     }
 
     @Override
