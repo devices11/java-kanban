@@ -117,6 +117,20 @@ public class InMemoryHistoryManagerTest {
         assertEquals(historyManager.getHistoryMap().get(2).next, historyManager.getHistoryMap().get(3),
                 "Ссылка на следующую ноду некорректна");
     }
+    @Test
+    @DisplayName("Удаление записи из середины в истории")
+    public void removeMiddleTaskInHistory() {
+        for (int i = 1; i <= 3; i++) {
+            Task task = new Task(("Название таски " + i), ("Описание таски " + i));
+            task.setId(i);
+            historyManager.add(task);
+        }
+        historyManager.remove(2);
+        assertEquals(historyManager.getHistoryMap().get(3).prev, historyManager.getHistoryMap().get(1),
+                "Ссылка на предыдущую ноду некорректная");
+        assertEquals(historyManager.getHistoryMap().get(1).next, historyManager.getHistoryMap().get(3),
+                "Ссылка на следующую ноду некорректная");
+    }
 
     @Test
     @DisplayName("Удаление последней записи в истории")

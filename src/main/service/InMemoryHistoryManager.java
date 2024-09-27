@@ -1,6 +1,5 @@
 package main.service;
 
-import main.models.Node;
 import main.models.Task;
 
 import java.util.ArrayList;
@@ -39,9 +38,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void remove(int id) {
         Node node = historyMap.get(id);
-        if (node != null) {
-            removeNode(node);
-        }
+        removeNode(node);
     }
 
     private void linkLast(Task task) {
@@ -56,14 +53,10 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private List<Task> getTasks() {
         List<Task> tasks = new ArrayList<>();
-        Node lastNode = this.last;
-        while (!historyMap.isEmpty()) {
-            if (lastNode != null) {
-                tasks.add(lastNode.task);
-                lastNode = lastNode.prev;
-            } else {
-                break;
-            }
+        Node lastNode = last;
+        while (lastNode != null) {
+            tasks.add(lastNode.task);
+            lastNode = lastNode.prev;
         }
         return tasks;
     }
@@ -74,8 +67,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             Node next = node.next;
 
             if (next == null && prev == null) {
-                historyMap.remove(node.task.getId());
-                return;
+                last = null;
             } else if (prev == null) {
                 next.prev = null;
             } else if (next == null) {
@@ -92,5 +84,17 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     public Map<Integer, Node> getHistoryMap() {
         return historyMap;
+    }
+
+    public static class Node {
+        public Task task;
+        public Node next;
+        public Node prev;
+
+        public Node(Node prev, Task task, Node next) {
+            this.task = task;
+            this.next = next;
+            this.prev = prev;
+        }
     }
 }
