@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryHistoryManagerTest {
@@ -32,30 +34,18 @@ public class InMemoryHistoryManagerTest {
     @DisplayName("Добавление единственной записи в историю")
     public void add1TaskInHistory() {
         historyManager.add(task1);
-        assertEquals(1, historyManager.getHistoryMap().size(), "В истории не 1 объект");
-        assertNull(historyManager.getHistoryMap().get(1).prev, "Ссылка на предыдущую ноду не null");
-        assertNull(historyManager.getHistoryMap().get(1).next, "Ссылка на следующую ноду не null");
-        assertEquals(historyManager.getHistoryMap().get(1).task.getTitle(), task1.getTitle(),
+        assertEquals(1, historyManager.getHistory().size(), "В истории не 1 объект");
+        assertEquals(historyManager.getHistory().getFirst().getTitle(), task1.getTitle(),
                 "Запись в историю не добавлена");
     }
 
     @Test
-    @DisplayName("Добавление записей в историю, обновление ссылок на ноды")
+    @DisplayName("Добавление записей в историю")
     public void addTaskInHistory() {
         historyManager.add(task1);
         historyManager.add(epic1);
         historyManager.add(subtask1);
-        assertEquals(3, historyManager.getHistoryMap().size(), "В истории не 3 объекта");
-        assertNull(historyManager.getHistoryMap().get(1).prev, "Ссылка ноды 1 на предыдущую ноду не null");
-        assertEquals(historyManager.getHistoryMap().get(1).next, historyManager.getHistoryMap().get(2),
-                "Ссылка на следующую ноду некорректная");
-        assertEquals(historyManager.getHistoryMap().get(2).prev, historyManager.getHistoryMap().get(1),
-                "Ссылка на предыдущую ноду некорректная");
-        assertEquals(historyManager.getHistoryMap().get(2).next, historyManager.getHistoryMap().get(3),
-                "Ссылка на следующую ноду некорректная");
-        assertNull(historyManager.getHistoryMap().get(3).next, "Ссылка ноды 2 на следующую ноду не null");
-        assertEquals(historyManager.getHistoryMap().get(3).prev, historyManager.getHistoryMap().get(2),
-                "Ссылка на предыдущую ноду некорректная");
+        assertEquals(List.of(subtask1, epic1, task1), historyManager.getHistory(), "История некорректна");
     }
 
     @Test
@@ -66,9 +56,7 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(subtask1);
         historyManager.add(task1);
 
-        assertEquals(historyManager.getHistoryMap().size(), 3, "Размер истории некорректный");
-        assertNull(historyManager.getHistoryMap().get(1).next, "Запись не последняя в истории");
-        assertNull(historyManager.getHistoryMap().get(2).prev, "Запись не первая в истории");
+        assertEquals(List.of(task1, subtask1, epic1), historyManager.getHistory(), "История некорректна");
     }
 
     @Test
@@ -99,7 +87,13 @@ public class InMemoryHistoryManagerTest {
         historyManager.remove(num);
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
-        assertNull(historyManager.getHistoryMap().get(num), "Запись не удалена из истории");
+        Task taskInHistory = null;
+        for (Task task : historyManager.getHistory()) {
+            if (task.getId() == num) {
+                taskInHistory = task;
+            }
+        }
+        assertNull(taskInHistory, "Запись не удалена из истории");
         System.out.println("Удалили запись " + num + " за " + duration + " наносекунд");
     }
 
@@ -112,11 +106,11 @@ public class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
         historyManager.remove(1);
-        assertNull(historyManager.getHistoryMap().get(1), "Запись не удалена из истории");
-        assertNull(historyManager.getHistoryMap().get(2).prev, "Ссылка на предыдущую ноду не null");
-        assertEquals(historyManager.getHistoryMap().get(2).next, historyManager.getHistoryMap().get(3),
-                "Ссылка на следующую ноду некорректна");
+        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getFirst().getId(), 3, "История некорректна");
+        assertEquals(historyManager.getHistory().getLast().getId(), 2, "История некорректна");
     }
+
     @Test
     @DisplayName("Удаление записи из середины в истории")
     public void removeMiddleTaskInHistory() {
@@ -126,10 +120,9 @@ public class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
         historyManager.remove(2);
-        assertEquals(historyManager.getHistoryMap().get(3).prev, historyManager.getHistoryMap().get(1),
-                "Ссылка на предыдущую ноду некорректная");
-        assertEquals(historyManager.getHistoryMap().get(1).next, historyManager.getHistoryMap().get(3),
-                "Ссылка на следующую ноду некорректная");
+        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getFirst().getId(), 3, "История некорректна");
+        assertEquals(historyManager.getHistory().getLast().getId(), 1, "История некорректна");
     }
 
     @Test
@@ -141,9 +134,9 @@ public class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
         historyManager.remove(3);
-        assertNull(historyManager.getHistoryMap().get(2).next, "Ссылка на следующую ноду не null");
-        assertEquals(historyManager.getHistoryMap().get(2).prev, historyManager.getHistoryMap().get(1),
-                "Ссылка на предыдущую ноду не null");
+        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getFirst().getId(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getLast().getId(), 1, "История некорректна");
     }
 
     @Test
@@ -152,6 +145,6 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task1);
         historyManager.remove(1);
 
-        assertEquals(historyManager.getHistoryMap().size(), 0, "История не пустая");
+        assertEquals(historyManager.getHistory().size(), 0, "История не пустая");
     }
 }

@@ -82,11 +82,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    public Map<Integer, Node> getHistoryMap() {
-        return historyMap;
-    }
-
-    public static class Node {
+    private static class Node {
         public Task task;
         public Node next;
         public Node prev;
