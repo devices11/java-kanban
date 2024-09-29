@@ -5,7 +5,10 @@ import main.models.Subtask;
 import main.models.Task;
 import main.service.InMemoryHistoryManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,86 +23,128 @@ public class InMemoryHistoryManagerTest {
         historyManager = new InMemoryHistoryManager();
 
         task1 = new Task("Название таски 1", "Описание таски 1");
+        task1.setId(1);
         epic1 = new Epic("Название эпика 1", "Описание эпика 1");
+        epic1.setId(2);
         subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1", 2);
+        subtask1.setId(3);
     }
 
     @Test
+    @DisplayName("Добавление единственной записи в историю")
     public void add1TaskInHistory() {
         historyManager.add(task1);
         assertEquals(1, historyManager.getHistory().size(), "В истории не 1 объект");
+        assertEquals(historyManager.getHistory().getFirst().getTitle(), task1.getTitle(),
+                "Запись в историю не добавлена");
     }
 
     @Test
-    public void taskInHistoryAllVersion() {
-        historyManager.add(task1);
-        Task taskForUpdate = new Task("Название таски 2", "Описание таски 2");
-        taskForUpdate.setId(1);
-        historyManager.add(taskForUpdate);
-        assertEquals(2, historyManager.getHistory().size(), "В истории не 2 объекта");
-        assertEquals("Название таски 1", historyManager.getHistory().getFirst().getTitle());
-        assertEquals("Описание таски 1", historyManager.getHistory().getFirst().getDescription());
-        assertEquals("Название таски 2", historyManager.getHistory().get(1).getTitle());
-        assertEquals("Описание таски 2", historyManager.getHistory().get(1).getDescription());
-    }
-
-        @Test
-    public void add10TaskInHistory() {
-        //Посмотрели 10 объектов
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
+    @DisplayName("Добавление записей в историю")
+    public void addTaskInHistory() {
         historyManager.add(task1);
         historyManager.add(epic1);
         historyManager.add(subtask1);
-
-        assertEquals(10, historyManager.getHistory().size(), "В истории не 10 объектов");
+        assertEquals(List.of(subtask1, epic1, task1), historyManager.getHistory(), "История некорректна");
     }
 
     @Test
-    public void checkLimit10TaskInHistory() {
-        //Посмотрели 11 объектов
-        historyManager.add(task1);
-        historyManager.add(epic1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
+    @DisplayName("Отсутствие в историю дублей")
+    public void addTaskInHistoryDuplicateEntry() {
         historyManager.add(task1);
         historyManager.add(epic1);
         historyManager.add(subtask1);
         historyManager.add(task1);
 
-        assertEquals(10, historyManager.getHistory().size(),"В истории не 10 объектов");
-        assertInstanceOf(Epic.class, historyManager.getHistory().getFirst(), "Первый объект не Epic");
-        assertInstanceOf(Task.class, historyManager.getHistory().get(9),"Десятый объект не Task");
+        assertEquals(List.of(task1, subtask1, epic1), historyManager.getHistory(), "История некорректна");
     }
 
     @Test
-    public void checkLimit10TaskInHistoryViewTaskNull() {
-        Task task = null;
-        //Посмотрели 11 объектов
-        historyManager.add(task);
-        historyManager.add(task1);
-        historyManager.add(epic1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(task1);
-        historyManager.add(epic1);
-        historyManager.add(subtask1);
-        historyManager.add(task);
+    @DisplayName("Просмотр истории с 1 млн записей")
+    public void get1MillionTaskInHistory() {
+        for (int i = 1; i <= 1_000_000; i++) {
+            Task task = new Task(("Название таски " + i), ("Описание таски " + i));
+            task.setId(i);
+            historyManager.add(task);
+        }
+        long startTime = System.nanoTime();
+        assertEquals(historyManager.getHistory().size(), 1_000_000);
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime);
+        System.out.println("Получили историю за " + duration * 0.000_000_001 + " сек.");
+    }
 
-        assertEquals(10, historyManager.getHistory().size(),"В истории не 10 объектов");
-        assertInstanceOf(Task.class, historyManager.getHistory().getFirst(), "Первый объект не Task");
-        assertInstanceOf(Subtask.class, historyManager.getHistory().get(9),"Десятый объект не Subtask");
+    @Test
+    @DisplayName("Удаление записи в истории с 1 млн записей")
+    public void removeTaskInBigHistory() {
+        for (int i = 1; i <= 1_000_000; i++) {
+            Task task = new Task(("Название таски " + i), ("Описание таски " + i));
+            task.setId(i);
+            historyManager.add(task);
+        }
+        int num = 965_001;
+        long startTime = System.nanoTime();
+        historyManager.remove(num);
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime);
+        Task taskInHistory = null;
+        for (Task task : historyManager.getHistory()) {
+            if (task.getId() == num) {
+                taskInHistory = task;
+            }
+        }
+        assertNull(taskInHistory, "Запись не удалена из истории");
+        System.out.println("Удалили запись " + num + " за " + duration + " наносекунд");
+    }
+
+    @Test
+    @DisplayName("Удаление первой записи в истории")
+    public void removeFirstTaskInHistory() {
+        for (int i = 1; i <= 3; i++) {
+            Task task = new Task(("Название таски " + i), ("Описание таски " + i));
+            task.setId(i);
+            historyManager.add(task);
+        }
+        historyManager.remove(1);
+        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getFirst().getId(), 3, "История некорректна");
+        assertEquals(historyManager.getHistory().getLast().getId(), 2, "История некорректна");
+    }
+
+    @Test
+    @DisplayName("Удаление записи из середины в истории")
+    public void removeMiddleTaskInHistory() {
+        for (int i = 1; i <= 3; i++) {
+            Task task = new Task(("Название таски " + i), ("Описание таски " + i));
+            task.setId(i);
+            historyManager.add(task);
+        }
+        historyManager.remove(2);
+        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getFirst().getId(), 3, "История некорректна");
+        assertEquals(historyManager.getHistory().getLast().getId(), 1, "История некорректна");
+    }
+
+    @Test
+    @DisplayName("Удаление последней записи в истории")
+    public void removeTailTaskInHistory() {
+        for (int i = 1; i <= 3; i++) {
+            Task task = new Task(("Название таски " + i), ("Описание таски " + i));
+            task.setId(i);
+            historyManager.add(task);
+        }
+        historyManager.remove(3);
+        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getFirst().getId(), 2, "История некорректна");
+        assertEquals(historyManager.getHistory().getLast().getId(), 1, "История некорректна");
+    }
+
+    @Test
+    @DisplayName("Удаление единственной записи в истории")
+    public void removeTaskInHistoryContainedOneObject() {
+        historyManager.add(task1);
+        historyManager.remove(1);
+
+        assertEquals(historyManager.getHistory().size(), 0, "История не пустая");
     }
 }

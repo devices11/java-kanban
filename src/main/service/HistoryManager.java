@@ -6,10 +6,12 @@ import java.util.List;
 
 public interface HistoryManager {
 
-    //пометить задачу как просмотренную
+    //Добавить задачу в историю
     void add(Task task);
 
     //Вернуть историю просмотренных задач
     List<Task> getHistory();
 
+    //Удалить задачу из истории
+    void remove(int id);
 }
