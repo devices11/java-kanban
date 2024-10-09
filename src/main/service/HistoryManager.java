@@ -10,7 +10,7 @@ public interface HistoryManager {
     void add(Task task);
 
     //Вернуть историю просмотренных задач
-    List<Task> getHistory();
+    List<Task> getAll();
 
     //Удалить задачу из истории
     void remove(int id);

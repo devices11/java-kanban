@@ -34,8 +34,9 @@ public class InMemoryHistoryManagerTest {
     @DisplayName("Добавление единственной записи в историю")
     public void add1TaskInHistory() {
         historyManager.add(task1);
-        assertEquals(1, historyManager.getHistory().size(), "В истории не 1 объект");
-        assertEquals(historyManager.getHistory().getFirst().getTitle(), task1.getTitle(),
+
+        assertEquals(1, historyManager.getAll().size(), "В истории не 1 объект");
+        assertEquals(historyManager.getAll().getFirst().getTitle(), task1.getTitle(),
                 "Запись в историю не добавлена");
     }
 
@@ -45,7 +46,8 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task1);
         historyManager.add(epic1);
         historyManager.add(subtask1);
-        assertEquals(List.of(subtask1, epic1, task1), historyManager.getHistory(), "История некорректна");
+
+        assertEquals(List.of(subtask1, epic1, task1), historyManager.getAll(), "История некорректна");
     }
 
     @Test
@@ -56,7 +58,7 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(subtask1);
         historyManager.add(task1);
 
-        assertEquals(List.of(task1, subtask1, epic1), historyManager.getHistory(), "История некорректна");
+        assertEquals(List.of(task1, subtask1, epic1), historyManager.getAll(), "История некорректна");
     }
 
     @Test
@@ -67,8 +69,9 @@ public class InMemoryHistoryManagerTest {
             task.setId(i);
             historyManager.add(task);
         }
+
         long startTime = System.nanoTime();
-        assertEquals(historyManager.getHistory().size(), 1_000_000);
+        assertEquals(historyManager.getAll().size(), 1_000_000);
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
         System.out.println("Получили историю за " + duration * 0.000_000_001 + " сек.");
@@ -88,11 +91,12 @@ public class InMemoryHistoryManagerTest {
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
         Task taskInHistory = null;
-        for (Task task : historyManager.getHistory()) {
+        for (Task task : historyManager.getAll()) {
             if (task.getId() == num) {
                 taskInHistory = task;
             }
         }
+
         assertNull(taskInHistory, "Запись не удалена из истории");
         System.out.println("Удалили запись " + num + " за " + duration + " наносекунд");
     }
@@ -106,9 +110,10 @@ public class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
         historyManager.remove(1);
-        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
-        assertEquals(historyManager.getHistory().getFirst().getId(), 3, "История некорректна");
-        assertEquals(historyManager.getHistory().getLast().getId(), 2, "История некорректна");
+
+        assertEquals(historyManager.getAll().size(), 2, "История некорректна");
+        assertEquals(historyManager.getAll().getFirst().getId(), 3, "История некорректна");
+        assertEquals(historyManager.getAll().getLast().getId(), 2, "История некорректна");
     }
 
     @Test
@@ -120,9 +125,10 @@ public class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
         historyManager.remove(2);
-        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
-        assertEquals(historyManager.getHistory().getFirst().getId(), 3, "История некорректна");
-        assertEquals(historyManager.getHistory().getLast().getId(), 1, "История некорректна");
+
+        assertEquals(historyManager.getAll().size(), 2, "История некорректна");
+        assertEquals(historyManager.getAll().getFirst().getId(), 3, "История некорректна");
+        assertEquals(historyManager.getAll().getLast().getId(), 1, "История некорректна");
     }
 
     @Test
@@ -134,9 +140,10 @@ public class InMemoryHistoryManagerTest {
             historyManager.add(task);
         }
         historyManager.remove(3);
-        assertEquals(historyManager.getHistory().size(), 2, "История некорректна");
-        assertEquals(historyManager.getHistory().getFirst().getId(), 2, "История некорректна");
-        assertEquals(historyManager.getHistory().getLast().getId(), 1, "История некорректна");
+        
+        assertEquals(historyManager.getAll().size(), 2, "История некорректна");
+        assertEquals(historyManager.getAll().getFirst().getId(), 2, "История некорректна");
+        assertEquals(historyManager.getAll().getLast().getId(), 1, "История некорректна");
     }
 
     @Test
@@ -145,6 +152,6 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task1);
         historyManager.remove(1);
 
-        assertEquals(historyManager.getHistory().size(), 0, "История не пустая");
+        assertEquals(historyManager.getAll().size(), 0, "История не пустая");
     }
 }
