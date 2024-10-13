@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FileBackedTaskManagerTest {
     private TaskManager taskManager;
-    private TaskManager emptyTaskManager;
     private File file;
 
 

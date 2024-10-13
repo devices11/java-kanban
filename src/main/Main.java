@@ -7,8 +7,6 @@ import main.service.Managers;
 import main.service.TaskManager;
 import main.util.StatusModel;
 
-import java.util.List;
-
 public class Main {
     static TaskManager taskManager = Managers.getFileBackedTaskManager();
 
