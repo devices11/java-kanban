@@ -4,13 +4,9 @@ import main.models.Epic;
 import main.models.Subtask;
 import main.models.Task;
 import main.util.Exception.ManagerSaveException;
-import main.util.StatusModel;
-import main.util.TypeTask;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-
-import static main.util.TypeTask.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
@@ -111,72 +107,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             bufferedWriter.write(header);
 
             for (Task task : getAllTask()) {
-                bufferedWriter.write(toString(task));
+                bufferedWriter.write(TaskConverter.toString(task));
             }
             for (Task task : getAllEpic()) {
-                bufferedWriter.write(toString(task));
+                bufferedWriter.write(TaskConverter.toString(task));
             }
             for (Task task : getAllSubtask()) {
-                bufferedWriter.write(toString(task));
+                bufferedWriter.write(TaskConverter.toString(task));
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка сохранения данных в файл");
         }
     }
 
-    //Преобразовать объект задачи в строку
-    private String toString(Task task) {
-        TypeTask type = null;
-        String epicId = "";
-        if (task.getClass().equals(Task.class)) {
-            type = TASK;
-        } else if (task.getClass().equals(Epic.class)) {
-            type = EPIC;
-        } else if (task.getClass().equals(Subtask.class)) {
-            type = SUBTASK;
-            epicId = String.valueOf(((Subtask) task).getEpicId());
-        }
-
-        return task.getId() + "," +
-                type + "," +
-                task.getTitle() + "," +
-                task.getStatus() + "," +
-                task.getDescription() + "," +
-                epicId + "\n";
-    }
-
-    //Преобразовать строку в объект задачи
-    private Task fromString(String value) {
-        String[] splitValue = value.split(",");
-        int id = Integer.parseInt(splitValue[0]);
-        TypeTask type = valueOf(splitValue[1]);
-        String name = splitValue[2];
-        StatusModel status = StatusModel.valueOf(splitValue[3]);
-        String description = splitValue[4];
-        int epicId = 0;
-        if (type.equals(SUBTASK)) {
-            epicId = Integer.parseInt(splitValue[5]);
-        }
-
-        if (type == TASK) {
-            Task task = new Task(name, description);
-            task.setId(id);
-            task.setStatus(status);
-            return task;
-        } else if (type == EPIC) {
-            Epic epic = new Epic(name, description);
-            epic.setId(id);
-            epic.setStatus(status);
-            return epic;
-        } else if (type == SUBTASK) {
-            Subtask subtask = new Subtask(name, description, epicId);
-            subtask.setId(id);
-            subtask.setStatus(status);
-            return subtask;
-        }
-
-        return null;
-    }
 
     //Выгрузить данные из файла в manager
     private void loadFromFile(File file) {
@@ -186,8 +129,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             while (br.ready()) {
                 String line = br.readLine();
-                Task task = fromString(line);
-                assert task != null : "Задача пустая";
+                if (line.isEmpty()) continue;
+                Task task = TaskConverter.fromString(line);
 
                 if (newId < task.getId()) {
                     newId = task.getId();
@@ -203,7 +146,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     subtaskStorage.put(subtask.getId(), subtask);
                     Epic epic = epicStorage.get(subtask.getEpicId());
                     epic.setSubtasks(subtask.getId());
-                    epicStorage.put(subtask.getEpicId(), epic);
                 }
             }
 

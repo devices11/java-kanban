@@ -1,5 +1,7 @@
 package main.models;
 
+import main.util.TypeTask;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -10,7 +12,12 @@ public class Epic extends Task {
         this.subtasks = new ArrayList<>();
     }
 
-    public void  setSubtasks(int subtaskId) {
+    @Override
+    public TypeTask getType() {
+        return TypeTask.EPIC;
+    }
+
+    public void setSubtasks(int subtaskId) {
         subtasks.add(subtaskId);
     }
 
