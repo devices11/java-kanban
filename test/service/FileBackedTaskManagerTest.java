@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static main.util.StatusModel.NEW;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FileBackedTaskManagerTest {
     private TaskManager taskManager;
@@ -35,8 +34,6 @@ public class FileBackedTaskManagerTest {
 
         Subtask subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1", 2);    //id==3
         taskManager.createSubtask(subtask1);
-
-        taskManagerFromFile = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
     }
 
     @AfterEach
@@ -93,6 +90,7 @@ public class FileBackedTaskManagerTest {
     @DisplayName("Чтение задач из файла")
     @Test
     void readFile() {
+        taskManagerFromFile = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
         List<Task> tasks = new ArrayList<>(taskManagerFromFile.getAllTask());
         List<Epic> epics = new ArrayList<>(taskManagerFromFile.getAllEpic());
         List<Subtask> subtasks = new ArrayList<>(taskManagerFromFile.getAllSubtask());
@@ -114,5 +112,15 @@ public class FileBackedTaskManagerTest {
         assertEquals(subtasks.getFirst().getStatus(), NEW, "Статус задачи некорректен");
         assertEquals(subtasks.getFirst().getDescription(), "Описание сабтаски 1", "Описание подзадачи некорректно");
         assertEquals(subtasks.getFirst().getEpicId(), 2, "id эпика некорректно");
+    }
+
+    @DisplayName("Сохранение и чтение данных в файл")
+    @Test
+    void saveAndReadFile() {
+        taskManagerFromFile = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
+
+        assertArrayEquals(taskManager.getAllTask().toArray(), taskManagerFromFile.getAllTask().toArray(), "Данные по задачам не совпадают");
+        assertArrayEquals(taskManager.getAllEpic().toArray(), taskManagerFromFile.getAllEpic().toArray(), "Данные по эпикам не совпадают");
+        assertArrayEquals(taskManager.getAllSubtask().toArray(), taskManagerFromFile.getAllSubtask().toArray(), "Данные по подзадачам не совпадают");
     }
 }
