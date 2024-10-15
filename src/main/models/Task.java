@@ -1,6 +1,7 @@
 package main.models;
 
 import main.util.StatusModel;
+import main.util.TypeTask;
 
 import java.util.Objects;
 
@@ -22,6 +23,10 @@ public class Task {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public TypeTask getType() {
+        return TypeTask.TASK;
     }
 
     public String getTitle() {
