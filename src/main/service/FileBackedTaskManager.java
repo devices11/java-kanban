@@ -99,7 +99,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     //Сохранить все задачи в файл
     private void save() {
-        String header = "id,type,name,status,description,epic\n";
+        String header = "id,type,name,status,description,epic,startTime,duration\n";
 
         try (Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8, false);
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
@@ -145,6 +145,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     Subtask subtask = (Subtask) task;
                     subtaskStorage.put(subtask.getId(), subtask);
                     Epic epic = epicStorage.get(subtask.getEpicId());
+                    super.checkUpdateEpic(epic);
                     epic.setSubtasks(subtask.getId());
                 }
             }

@@ -5,10 +5,8 @@ import main.models.Subtask;
 import main.models.Task;
 import main.util.StatusModel;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.time.Duration;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HistoryManager historyManager;
@@ -47,6 +45,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtaskStorage.put(newId, subtask);
         Epic epic = epicStorage.get(subtask.getEpicId());
         epic.setSubtasks(newId);
+        checkUpdateEpic(epic);
         epicStorage.put(subtask.getEpicId(), epic);
         newId++;
         return subtask;
@@ -99,7 +98,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateEpic(Epic epic) {
         if (epicStorage.containsKey(epic.getId())) {
             epicStorage.put(epic.getId(), epic);
-            checkUpdateEpicStatus(epic);
+            checkUpdateEpic(epic);
         }
     }
 
@@ -107,7 +106,8 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateSubtask(Subtask subtask) {
         if (subtaskStorage.containsKey(subtask.getId())) {
             subtaskStorage.put(subtask.getId(), subtask);
-            checkUpdateEpicStatus(epicStorage.get(subtask.getEpicId()));
+            Epic epic = epicStorage.get(subtask.getEpicId());
+            checkUpdateEpic(epic);
         }
     }
 
@@ -142,7 +142,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (int epicId : epicStorage.keySet()) {
             Epic epic = epicStorage.get(epicId);
             epic.deleteAllSubtask();
-            checkUpdateEpicStatus(epic);
+            checkUpdateEpic(epic);
         }
     }
 
@@ -169,12 +169,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtaskById(int id) {
-        Epic epic = epicStorage.get(subtaskStorage.get(id).getEpicId());
-        subtaskStorage.remove(id);
+        Subtask subtask = subtaskStorage.get(id);
+        Epic epic = epicStorage.get(subtask.getEpicId());
         if (epic != null) {
             epic.deleteSubtaskId(id);
-            checkUpdateEpicStatus(epic);
+            checkUpdateEpic(epic);
         }
+        subtaskStorage.remove(id);
         historyManager.remove(id);
     }
 
@@ -191,7 +192,20 @@ public class InMemoryTaskManager implements TaskManager {
         return subtasks;
     }
 
-    //Проверить и обновить статус эпика в зависимости от статуса подзадач. Пользователю не доступен.
+    //Получить историю просмотра задач
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
+    protected void checkUpdateEpic(Epic epic) {
+        checkUpdateEpicStatus(epic);
+        updateEpicStartTime(epic);
+        updateEpicDuration(epic);
+        updateEpicEndTime(epic);
+    }
+
+//    Проверить и обновить статус эпика в зависимости от статуса подзадач. Пользователю не доступен.
     private void checkUpdateEpicStatus(Epic epic) {
         if (epic.getSubtasks().isEmpty() && !epic.getStatus().equals(StatusModel.DONE)) {
             epic.setStatus(StatusModel.NEW);
@@ -219,8 +233,31 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    @Override
-    public List<Task> getHistory() {
-        return historyManager.getHistory();
+    //Обновить продолжительность эпика
+    private void updateEpicDuration(Epic epic) {
+        Duration duration = getAllSubtaskInEpic(epic.getId()).stream()
+                .filter(subtask -> subtask.getDuration() != null && !subtask.getDuration().isZero())
+                .map(Subtask::getDuration)
+                .reduce(Duration.ZERO, Duration::plus);
+
+        epic.setDuration(duration);
+    }
+
+    //Обновить дату взятия эпика в работу
+    private void updateEpicStartTime(Epic epic) {
+        Optional<Subtask> startTime = getAllSubtaskInEpic(epic.getId()).stream()
+                .filter(subtask -> subtask.getStartTime() != null)
+                .min(Comparator.comparing(Task::getStartTime));
+
+        startTime.ifPresent(subtask -> epic.setStartTime(subtask.getStartTime()));
+    }
+
+    //Обновить дату окончания эпика
+    private void updateEpicEndTime(Epic epic) {
+        Optional<Subtask> endTime = getAllSubtaskInEpic(epic.getId()).stream()
+                .filter(subtask -> subtask.getStartTime() != null)
+                .max(Comparator.comparing(Task::getStartTime));
+
+        endTime.ifPresent(subtask -> epic.setEndTime(subtask.getEndTime()));
     }
 }

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class FileBackedTaskManagerTest {
         Epic epic1 = new Epic("Название эпика 1", "Описание эпика 1");   //id==2
         taskManager.createEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1", 2);    //id==3
+        Subtask subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1", 2, LocalDateTime.parse("2024-10-24T20:33:45.004446100"), 55);    //id==3
         taskManager.createSubtask(subtask1);
     }
 
@@ -58,7 +59,7 @@ public class FileBackedTaskManagerTest {
         }
 
         assertEquals(1, allLinesInFile.size(), "Файл не пустой");
-        assertEquals("id,type,name,status,description,epic", allLinesInFile.getFirst(),
+        assertEquals("id,type,name,status,description,epic,startTime,duration", allLinesInFile.getFirst(),
                 "Первая строка некорректна");
     }
 
@@ -76,13 +77,13 @@ public class FileBackedTaskManagerTest {
         }
 
         assertEquals(4, allLinesInFile.size(), "Количество задач некорректно");
-        assertEquals("id,type,name,status,description,epic", allLinesInFile.getFirst(),
+        assertEquals("id,type,name,status,description,epic,startTime,duration", allLinesInFile.getFirst(),
                 "Первая строка некорректна");
-        assertEquals("1,TASK,Название таски 1,NEW,Описание таски 1,", allLinesInFile.get(1),
+        assertEquals("1,TASK,Название таски 1,NEW,Описание таски 1,null,0,", allLinesInFile.get(1),
                 "Задача создана некорректно");
-        assertEquals("2,EPIC,Название эпика 1,NEW,Описание эпика 1,", allLinesInFile.get(2),
+        assertEquals("2,EPIC,Название эпика 1,NEW,Описание эпика 1,2024-10-24T20:33:45.004446100,55,", allLinesInFile.get(2),
                 "Эпик создан некорректно");
-        assertEquals("3,SUBTASK,Название сабтаски 1,NEW,Описание сабтаски 1,2", allLinesInFile.get(3),
+        assertEquals("3,SUBTASK,Название сабтаски 1,NEW,Описание сабтаски 1,2024-10-24T20:33:45.004446100,55,2", allLinesInFile.get(3),
                 "Подзадача создана некорректно");
         assertNotNull(taskManager.getAllTask(), "Хранилище тасок пустое");
     }

@@ -2,12 +2,20 @@ package main.models;
 
 import main.util.TypeTask;
 
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
     private final int epicId;
 
     public Subtask(String title, String description, int epicId) {
         super(title, description);
         this.epicId = epicId;
+    }
+
+    public Subtask(String title, String description, int epicId, LocalDateTime startTime, int duration) {
+        super(title, description, startTime, duration);
+        this.epicId = epicId;
+
     }
 
     @Override
@@ -27,6 +35,8 @@ public class Subtask extends Task {
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", epicId='" + epicId + '\'' +
+                ", duration='" + getDuration() + '\'' +
+                ", startTime='" + getStartTime() + '\'' +
                 '}';
     }
 
