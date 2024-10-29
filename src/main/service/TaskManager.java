@@ -7,6 +7,7 @@ import main.models.Task;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.TreeSet;
 
 public interface TaskManager {
 
@@ -16,7 +17,7 @@ public interface TaskManager {
 
     Collection<Task> getAllTask();
 
-    void updateTask(Task task);
+    Task updateTask(Task task);
 
     void deleteAllTask();
 
@@ -30,7 +31,7 @@ public interface TaskManager {
 
     Collection<Epic> getAllEpic();
 
-    void updateEpic(Epic epic);
+    Epic updateEpic(Epic epic);
 
     void deleteAllEpic();
 
@@ -42,11 +43,13 @@ public interface TaskManager {
 
     Collection<Subtask> getAllSubtask();
 
-    void updateSubtask(Subtask subtask);
+    Subtask updateSubtask(Subtask subtask);
 
     void deleteAllSubtask();
 
     void deleteSubtaskById(int id);
 
     List<Task> getHistory();
+
+    TreeSet<Task> getPrioritizedTasks();
 }

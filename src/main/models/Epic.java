@@ -15,8 +15,8 @@ public class Epic extends Task {
         this.endTime = null;
     }
 
-    public Epic(String title, String description, LocalDateTime startTime, int duration) {
-        super(title, description, startTime, duration);
+    public Epic(String title, String description, LocalDateTime startTime, int durationOfMinutes) {
+        super(title, description, startTime, durationOfMinutes);
         this.subtasks = new ArrayList<>();
         this.endTime = null;
     }

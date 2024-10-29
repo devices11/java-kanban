@@ -23,11 +23,11 @@ public class Task {
         this.startTime = null;
     }
 
-    public Task(String title, String description, LocalDateTime startTime, int duration) {
+    public Task(String title, String description, LocalDateTime startTime, int durationOfMinutes) {
         this.status = StatusModel.NEW;
         this.title = title;
         this.description = description;
-        this.duration = Duration.ofMinutes(duration);
+        this.duration = Duration.ofMinutes(durationOfMinutes);
         this.startTime = startTime;
     }
 
@@ -72,7 +72,7 @@ public class Task {
     }
 
     public void setDuration(Duration duration) {
-        this.duration = duration;
+        this.duration = Objects.requireNonNullElse(duration, Duration.ZERO);
     }
 
     public LocalDateTime getStartTime() {
@@ -99,7 +99,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, id, status);
+        return Objects.hash(title, description, id, status, duration, startTime);
     }
 
     @Override

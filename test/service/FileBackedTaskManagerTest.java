@@ -42,7 +42,7 @@ public class FileBackedTaskManagerTest {
         file.deleteOnExit();
     }
 
-    @DisplayName("Cохранение пустого хранилища в файл")
+    @DisplayName("Сохранение пустого хранилища в файл")
     @Test
     void saveEmptyStorage() throws IOException {
         taskManager.deleteAllTask();
