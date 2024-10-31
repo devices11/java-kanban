@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-abstract class TaskManagerTest{
+abstract class TaskManagerTest {
     TaskManager taskManager;
     Task task1;
     Epic epic1;

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.time.LocalDateTime;
 
-class InMemoryTaskManagerTest extends TaskManagerTest{
+class InMemoryTaskManagerTest extends TaskManagerTest {
 
     @BeforeEach
     public void beforeEach() {
