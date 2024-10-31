@@ -29,7 +29,7 @@ public class TaskConverter {
                 task.getStatus() + "," +
                 task.getDescription() + "," +
                 task.getStartTime() + "," +
-                task.getDuration().toMinutesPart() + "," +
+                task.getDuration() + "," +
                 epicId + "\n";
     }
 
@@ -42,11 +42,9 @@ public class TaskConverter {
         StatusModel status = StatusModel.valueOf(splitValue[3]);
         String description = splitValue[4];
         int epicId = 0;
-        LocalDateTime startTime = null;
-        Duration duration = null;
+        LocalDateTime startTime = !splitValue[5].isEmpty() ? LocalDateTime.parse(splitValue[5]) : null;
+        Duration duration = !splitValue[6].isEmpty() ? Duration.parse(splitValue[6]) : null;
         if (type.equals(SUBTASK)) {
-            startTime = splitValue[5].isEmpty() ? LocalDateTime.parse(splitValue[6]) : null;
-            duration = splitValue[6].isEmpty() ? Duration.ofMinutes(Integer.parseInt(splitValue[7])) : null;
             epicId = Integer.parseInt(splitValue[7]);
         }
 

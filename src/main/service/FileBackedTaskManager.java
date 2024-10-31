@@ -102,7 +102,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     //Сохранить все задачи в файл
     private void save() {
-        String header = "id,type,name,status,description,epic,startTime,duration\n";
+        String header = "id,type,name,status,description,startTime,duration,epic\n";
 
         try (Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8, false);
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
@@ -141,6 +141,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 if (task.getClass().equals(Task.class)) {
                     taskStorage.put(task.getId(), task);
+                    prioritizedTasks.add(task);
                 } else if (task.getClass().equals(Epic.class)) {
                     Epic epic = (Epic) task;
                     epicStorage.put(epic.getId(), epic);
@@ -148,8 +149,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     Subtask subtask = (Subtask) task;
                     subtaskStorage.put(subtask.getId(), subtask);
                     Epic epic = epicStorage.get(subtask.getEpicId());
-                    super.checkUpdateEpic(epic);
                     epic.setSubtasks(subtask.getId());
+                    super.checkUpdateEpic(epic);
+                    prioritizedTasks.add(subtask);
                 }
             }
 

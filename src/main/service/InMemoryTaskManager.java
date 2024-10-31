@@ -15,7 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epicStorage;
     protected final HashMap<Integer, Subtask> subtaskStorage;
     protected int newId = 1;
-    private final TreeSet<Task> prioritizedTasks;
+    protected final TreeSet<Task> prioritizedTasks;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -214,8 +214,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     //Вернуть список задач в порядке приоритета
     @Override
-    public TreeSet<Task> getPrioritizedTasks() {
-        return new TreeSet<>(prioritizedTasks);
+    public List<Task> getPrioritizedTasks() {
+        return new ArrayList<>(prioritizedTasks);
     }
 
     private void updatePrioritizedTasks(Task task) {
@@ -286,7 +286,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     //Обновить дату окончания эпика
-    private void updateEpicEndTime(Epic epic) {
+    protected void updateEpicEndTime(Epic epic) {
         Optional<Subtask> endTime = getAllSubtaskInEpic(epic.getId()).stream()
                 .filter(subtask -> subtask.getStartTime() != null)
                 .max(Comparator.comparing(Task::getStartTime));
@@ -303,10 +303,8 @@ public class InMemoryTaskManager implements TaskManager {
         Optional<Task> overlap =
                 getPrioritizedTasks().stream()
                         .filter(task1 -> task1.getId() != task.getId())
-                        .filter(task1 -> (task.getStartTime().isAfter(task1.getStartTime()) &&
-                                task.getStartTime().isBefore(task1.getEndTime())) ||
-                                (task.getEndTime().isAfter(task1.getStartTime()) &&
-                                        task.getEndTime().isBefore(task1.getEndTime())))
+                        .filter(task1 -> task.getStartTime().isBefore(task1.getEndTime()) &&
+                                task.getEndTime().isAfter(task1.getStartTime()))
                         .findFirst();
         return overlap.isPresent();
     }

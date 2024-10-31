@@ -4,21 +4,22 @@ import main.models.Epic;
 import main.models.Subtask;
 import main.models.Task;
 import main.service.FileBackedTaskManager;
+import main.service.HistoryManager;
 import main.service.Managers;
 import main.service.TaskManager;
+import main.util.Exception.ManagerSaveException;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static main.util.StatusModel.NEW;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest {
-    private TaskManager taskManager;
+public class FileBackedTaskManagerTest extends TaskManagerTest {
     private TaskManager taskManagerFromFile;
     private File file;
 
@@ -27,13 +28,15 @@ public class FileBackedTaskManagerTest {
         file = File.createTempFile("storage", ".csv");
         taskManager = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
 
-        Task task1 = new Task("Название таски 1", "Описание таски 1");   //id==1
+        task1 = new Task("Название таски 1", "Описание таски 1",
+                LocalDateTime.parse("2024-10-24T21:00:00"), 1440);   //id==1
         taskManager.createTask(task1);
 
-        Epic epic1 = new Epic("Название эпика 1", "Описание эпика 1");   //id==2
+        epic1 = new Epic("Название эпика 1", "Описание эпика 1");   //id==2
         taskManager.createEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1", 2, LocalDateTime.parse("2024-10-24T20:33:45.004446100"), 55);    //id==3
+        subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1",
+                epic1.getId(), LocalDateTime.parse("2024-10-20T20:00:00"), 55);    //id==3
         taskManager.createSubtask(subtask1);
     }
 
@@ -59,7 +62,7 @@ public class FileBackedTaskManagerTest {
         }
 
         assertEquals(1, allLinesInFile.size(), "Файл не пустой");
-        assertEquals("id,type,name,status,description,epic,startTime,duration", allLinesInFile.getFirst(),
+        assertEquals("id,type,name,status,description,startTime,duration,epic", allLinesInFile.getFirst(),
                 "Первая строка некорректна");
     }
 
@@ -77,13 +80,17 @@ public class FileBackedTaskManagerTest {
         }
 
         assertEquals(4, allLinesInFile.size(), "Количество задач некорректно");
-        assertEquals("id,type,name,status,description,epic,startTime,duration", allLinesInFile.getFirst(),
+        assertEquals("id,type,name,status,description,startTime,duration,epic", allLinesInFile.getFirst(),
                 "Первая строка некорректна");
-        assertEquals("1,TASK,Название таски 1,NEW,Описание таски 1,null,0,", allLinesInFile.get(1),
+        assertEquals("1,TASK,Название таски 1,NEW,Описание таски 1,"
+                        + super.task1.getStartTime() + "," + super.task1.getDuration() + ",", allLinesInFile.get(1),
                 "Задача создана некорректно");
-        assertEquals("2,EPIC,Название эпика 1,NEW,Описание эпика 1,2024-10-24T20:33:45.004446100,55,", allLinesInFile.get(2),
+        assertEquals("2,EPIC,Название эпика 1,NEW,Описание эпика 1,"
+                        + super.epic1.getStartTime() + "," + super.epic1.getDuration() + ",", allLinesInFile.get(2),
                 "Эпик создан некорректно");
-        assertEquals("3,SUBTASK,Название сабтаски 1,NEW,Описание сабтаски 1,2024-10-24T20:33:45.004446100,55,2", allLinesInFile.get(3),
+        assertEquals("3,SUBTASK,Название сабтаски 1,NEW,Описание сабтаски 1,"
+                        + super.subtask1.getStartTime() + "," + super.subtask1.getDuration() + ","
+                        + super.subtask1.getEpicId(), allLinesInFile.get(3),
                 "Подзадача создана некорректно");
         assertNotNull(taskManager.getAllTask(), "Хранилище тасок пустое");
     }
@@ -98,21 +105,31 @@ public class FileBackedTaskManagerTest {
 
         assertEquals(3, tasks.size() + epics.size() + subtasks.size(), "Количество задач некорректно");
 
-        assertEquals(tasks.getFirst().getId(), 1, "id задачи некорректен");
-        assertEquals(tasks.getFirst().getTitle(), "Название таски 1", "Название задачи некорректно");
-        assertEquals(tasks.getFirst().getStatus(), NEW, "Статус задачи некорректен");
-        assertEquals(tasks.getFirst().getDescription(), "Описание таски 1", "Описание задачи некорректно");
+        assertEquals(super.task1.getId(), tasks.getFirst().getId(), "id задачи некорректен");
+        assertEquals(super.task1.getTitle(), tasks.getFirst().getTitle(), "Название задачи некорректно");
+        assertEquals(super.task1.getStatus(), tasks.getFirst().getStatus(), "Статус задачи некорректен");
+        assertEquals(super.task1.getDescription(), tasks.getFirst().getDescription(), "Описание задачи некорректно");
+        assertEquals(super.task1.getStartTime(), tasks.getFirst().getStartTime(), "Дата старта некорректна");
+        assertEquals(super.task1.getDuration(), tasks.getFirst().getDuration(), "Срок выполнения некорректен");
 
-        assertEquals(epics.getFirst().getId(), 2, "id эпика некорректен");
-        assertEquals(epics.getFirst().getTitle(), "Название эпика 1", "Название эпика некорректно");
-        assertEquals(epics.getFirst().getStatus(), NEW, "Статус эпика некорректен");
-        assertEquals(epics.getFirst().getDescription(), "Описание эпика 1", "Описание эпика некорректно");
+        assertEquals(super.epic1.getId(), epics.getFirst().getId(), "id эпика некорректен");
+        assertEquals(super.epic1.getTitle(), epics.getFirst().getTitle(), "Название эпика некорректно");
+        assertEquals(super.epic1.getStatus(), epics.getFirst().getStatus(), "Статус эпика некорректен");
+        assertEquals(super.epic1.getDescription(), epics.getFirst().getDescription(), "Описание эпика некорректно");
+        assertEquals(super.epic1.getStartTime(), epics.getFirst().getStartTime(), "Дата старта некорректна");
+        assertEquals(super.epic1.getDuration(), epics.getFirst().getDuration(), "Срок выполнения некорректен");
+        assertEquals(super.epic1.getEndTime(), epics.getFirst().getEndTime(), "Дата окончания некорректна");
 
-        assertEquals(subtasks.getFirst().getId(), 3, "id подзадачи некорректен");
-        assertEquals(subtasks.getFirst().getTitle(), "Название сабтаски 1", "Название подзадачи некорректно");
-        assertEquals(subtasks.getFirst().getStatus(), NEW, "Статус задачи некорректен");
-        assertEquals(subtasks.getFirst().getDescription(), "Описание сабтаски 1", "Описание подзадачи некорректно");
-        assertEquals(subtasks.getFirst().getEpicId(), 2, "id эпика некорректно");
+        assertEquals(super.subtask1.getId(), subtasks.getFirst().getId(), "id подзадачи некорректен");
+        assertEquals(super.subtask1.getTitle(), subtasks.getFirst().getTitle(), "Название подзадачи некорректно");
+        assertEquals(super.subtask1.getStatus(), subtasks.getFirst().getStatus(), "Статус задачи некорректен");
+        assertEquals(super.subtask1.getDescription(), subtasks.getFirst().getDescription(), "Описание подзадачи некорректно");
+        assertEquals(super.subtask1.getEpicId(), subtasks.getFirst().getEpicId(), "id эпика некорректно");
+        assertEquals(super.subtask1.getStartTime(), subtasks.getFirst().getStartTime(), "Дата старта некорректна");
+        assertEquals(super.subtask1.getDuration(), subtasks.getFirst().getDuration(), "Срок выполнения некорректен");
+
+        assertEquals(2, taskManagerFromFile.getPrioritizedTasks().size(), "Список приоритетных задач некорректен");
+        assertEquals(3, taskManagerFromFile.getPrioritizedTasks().getFirst().getId(), "Список приоритетных задач некорректен");
     }
 
     @DisplayName("Сохранение и чтение данных в файл")
@@ -124,4 +141,28 @@ public class FileBackedTaskManagerTest {
         assertArrayEquals(taskManager.getAllEpic().toArray(), taskManagerFromFile.getAllEpic().toArray(), "Данные по эпикам не совпадают");
         assertArrayEquals(taskManager.getAllSubtask().toArray(), taskManagerFromFile.getAllSubtask().toArray(), "Данные по подзадачам не совпадают");
     }
+
+    @DisplayName("Отсутствует файл при записи данных")
+    @Test
+    void saveFileException() {
+        Task task = new Task("Название таски 1", "Описание таски 1",
+                LocalDateTime.parse("2024-10-24T21:00:00"), 1440);   //id==1
+
+        assertThrows(ManagerSaveException.class, () -> {
+            file = Path.of("test").toFile();
+            TaskManager taskManager2 = new FileBackedTaskManager(Managers.getDefaultHistory(), file);
+            taskManager2.createTask(task);
+        }, "Отсутствие файла должно приводить к исключению");
+    }
+
+    @DisplayName("Отсутствует файл при чтении данных")
+    @Test
+    void openFileException() {
+        assertThrows(ManagerSaveException.class, () -> {
+            file = Path.of("test").toFile();
+            taskManagerFromFile = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
+        }, "Отсутствие файла должно приводить к исключению");
+    }
+
+
 }
