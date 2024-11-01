@@ -16,7 +16,7 @@ public interface TaskManager {
 
     Collection<Task> getAllTask();
 
-    void updateTask(Task task);
+    Task updateTask(Task task);
 
     void deleteAllTask();
 
@@ -30,7 +30,7 @@ public interface TaskManager {
 
     Collection<Epic> getAllEpic();
 
-    void updateEpic(Epic epic);
+    Epic updateEpic(Epic epic);
 
     void deleteAllEpic();
 
@@ -42,11 +42,13 @@ public interface TaskManager {
 
     Collection<Subtask> getAllSubtask();
 
-    void updateSubtask(Subtask subtask);
+    Subtask updateSubtask(Subtask subtask);
 
     void deleteAllSubtask();
 
     void deleteSubtaskById(int id);
 
     List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
 }

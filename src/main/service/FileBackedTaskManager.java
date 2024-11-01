@@ -44,21 +44,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public Task updateTask(Task task) {
         super.updateTask(task);
         save();
+        return task;
     }
 
     @Override
-    public void updateEpic(Epic epic) {
+    public Epic updateEpic(Epic epic) {
         super.updateEpic(epic);
         save();
+        return epic;
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public Subtask updateSubtask(Subtask subtask) {
         super.updateSubtask(subtask);
         save();
+        return subtask;
     }
 
     @Override
@@ -99,7 +102,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     //Сохранить все задачи в файл
     private void save() {
-        String header = "id,type,name,status,description,epic\n";
+        String header = "id,type,name,status,description,startTime,duration,epic\n";
 
         try (Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8, false);
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
@@ -138,6 +141,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 if (task.getClass().equals(Task.class)) {
                     taskStorage.put(task.getId(), task);
+                    prioritizedTasks.add(task);
                 } else if (task.getClass().equals(Epic.class)) {
                     Epic epic = (Epic) task;
                     epicStorage.put(epic.getId(), epic);
@@ -146,6 +150,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     subtaskStorage.put(subtask.getId(), subtask);
                     Epic epic = epicStorage.get(subtask.getEpicId());
                     epic.setSubtasks(subtask.getId());
+                    super.checkUpdateEpic(epic);
+                    prioritizedTasks.add(subtask);
                 }
             }
 

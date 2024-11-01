@@ -3,6 +3,8 @@ package main.models;
 import main.util.StatusModel;
 import main.util.TypeTask;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -10,11 +12,23 @@ public class Task {
     private String description;
     private int id;
     private StatusModel status;
+    private Duration duration;
+    private LocalDateTime startTime;
 
     public Task(String title, String description) {
         this.status = StatusModel.NEW;
         this.title = title;
         this.description = description;
+        this.duration = Duration.ZERO;
+        this.startTime = null;
+    }
+
+    public Task(String title, String description, LocalDateTime startTime, int durationOfMinutes) {
+        this.status = StatusModel.NEW;
+        this.title = title;
+        this.description = description;
+        this.duration = Duration.ofMinutes(durationOfMinutes);
+        this.startTime = startTime;
     }
 
     public int getId() {
@@ -53,6 +67,29 @@ public class Task {
         this.status = status;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = Objects.requireNonNullElse(duration, Duration.ZERO);
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            return null;
+        }
+        return startTime.plus(duration);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -62,7 +99,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, id, status);
+        return Objects.hash(id);
     }
 
     @Override
@@ -72,6 +109,8 @@ public class Task {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
                 '}';
     }
 }

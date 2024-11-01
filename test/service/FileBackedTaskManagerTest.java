@@ -6,18 +6,19 @@ import main.models.Task;
 import main.service.FileBackedTaskManager;
 import main.service.Managers;
 import main.service.TaskManager;
+import main.util.Exception.ManagerSaveException;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static main.util.StatusModel.NEW;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest {
-    private TaskManager taskManager;
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private TaskManager taskManagerFromFile;
     private File file;
 
@@ -25,15 +26,7 @@ public class FileBackedTaskManagerTest {
     public void beforeEach() throws IOException {
         file = File.createTempFile("storage", ".csv");
         taskManager = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
-
-        Task task1 = new Task("Название таски 1", "Описание таски 1");   //id==1
-        taskManager.createTask(task1);
-
-        Epic epic1 = new Epic("Название эпика 1", "Описание эпика 1");   //id==2
-        taskManager.createEpic(epic1);
-
-        Subtask subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1", 2);    //id==3
-        taskManager.createSubtask(subtask1);
+        createTasks();
     }
 
     @AfterEach
@@ -41,7 +34,7 @@ public class FileBackedTaskManagerTest {
         file.deleteOnExit();
     }
 
-    @DisplayName("Cохранение пустого хранилища в файл")
+    @DisplayName("Сохранение пустого хранилища в файл")
     @Test
     void saveEmptyStorage() throws IOException {
         taskManager.deleteAllTask();
@@ -58,7 +51,7 @@ public class FileBackedTaskManagerTest {
         }
 
         assertEquals(1, allLinesInFile.size(), "Файл не пустой");
-        assertEquals("id,type,name,status,description,epic", allLinesInFile.getFirst(),
+        assertEquals("id,type,name,status,description,startTime,duration,epic", allLinesInFile.getFirst(),
                 "Первая строка некорректна");
     }
 
@@ -76,13 +69,17 @@ public class FileBackedTaskManagerTest {
         }
 
         assertEquals(4, allLinesInFile.size(), "Количество задач некорректно");
-        assertEquals("id,type,name,status,description,epic", allLinesInFile.getFirst(),
+        assertEquals("id,type,name,status,description,startTime,duration,epic", allLinesInFile.getFirst(),
                 "Первая строка некорректна");
-        assertEquals("1,TASK,Название таски 1,NEW,Описание таски 1,", allLinesInFile.get(1),
+        assertEquals("1,TASK,Название таски 1,NEW,Описание таски 1,"
+                        + super.task1.getStartTime() + "," + super.task1.getDuration() + ",", allLinesInFile.get(1),
                 "Задача создана некорректно");
-        assertEquals("2,EPIC,Название эпика 1,NEW,Описание эпика 1,", allLinesInFile.get(2),
+        assertEquals("2,EPIC,Название эпика 1,NEW,Описание эпика 1,"
+                        + super.epic1.getStartTime() + "," + super.epic1.getDuration() + ",", allLinesInFile.get(2),
                 "Эпик создан некорректно");
-        assertEquals("3,SUBTASK,Название сабтаски 1,NEW,Описание сабтаски 1,2", allLinesInFile.get(3),
+        assertEquals("3,SUBTASK,Название сабтаски 1,NEW,Описание сабтаски 1,"
+                        + super.subtask1.getStartTime() + "," + super.subtask1.getDuration() + ","
+                        + super.subtask1.getEpicId(), allLinesInFile.get(3),
                 "Подзадача создана некорректно");
         assertNotNull(taskManager.getAllTask(), "Хранилище тасок пустое");
     }
@@ -97,21 +94,10 @@ public class FileBackedTaskManagerTest {
 
         assertEquals(3, tasks.size() + epics.size() + subtasks.size(), "Количество задач некорректно");
 
-        assertEquals(tasks.getFirst().getId(), 1, "id задачи некорректен");
-        assertEquals(tasks.getFirst().getTitle(), "Название таски 1", "Название задачи некорректно");
-        assertEquals(tasks.getFirst().getStatus(), NEW, "Статус задачи некорректен");
-        assertEquals(tasks.getFirst().getDescription(), "Описание таски 1", "Описание задачи некорректно");
-
-        assertEquals(epics.getFirst().getId(), 2, "id эпика некорректен");
-        assertEquals(epics.getFirst().getTitle(), "Название эпика 1", "Название эпика некорректно");
-        assertEquals(epics.getFirst().getStatus(), NEW, "Статус эпика некорректен");
-        assertEquals(epics.getFirst().getDescription(), "Описание эпика 1", "Описание эпика некорректно");
-
-        assertEquals(subtasks.getFirst().getId(), 3, "id подзадачи некорректен");
-        assertEquals(subtasks.getFirst().getTitle(), "Название сабтаски 1", "Название подзадачи некорректно");
-        assertEquals(subtasks.getFirst().getStatus(), NEW, "Статус задачи некорректен");
-        assertEquals(subtasks.getFirst().getDescription(), "Описание сабтаски 1", "Описание подзадачи некорректно");
-        assertEquals(subtasks.getFirst().getEpicId(), 2, "id эпика некорректно");
+        assertArrayEquals(taskManager.getAllTask().toArray(), taskManagerFromFile.getAllTask().toArray());
+        assertArrayEquals(taskManager.getAllEpic().toArray(), taskManagerFromFile.getAllEpic().toArray());
+        assertArrayEquals(taskManager.getAllSubtask().toArray(), taskManagerFromFile.getAllSubtask().toArray());
+        assertArrayEquals(taskManager.getPrioritizedTasks().toArray(), taskManagerFromFile.getPrioritizedTasks().toArray());
     }
 
     @DisplayName("Сохранение и чтение данных в файл")
@@ -123,4 +109,28 @@ public class FileBackedTaskManagerTest {
         assertArrayEquals(taskManager.getAllEpic().toArray(), taskManagerFromFile.getAllEpic().toArray(), "Данные по эпикам не совпадают");
         assertArrayEquals(taskManager.getAllSubtask().toArray(), taskManagerFromFile.getAllSubtask().toArray(), "Данные по подзадачам не совпадают");
     }
+
+    @DisplayName("Отсутствует файл при записи данных")
+    @Test
+    void saveFileException() {
+        Task task = new Task("Название таски 1", "Описание таски 1",
+                LocalDateTime.parse("2024-10-24T21:00:00"), 1440);   //id==1
+
+        assertThrows(ManagerSaveException.class, () -> {
+            file = Path.of("test").toFile();
+            TaskManager taskManager2 = new FileBackedTaskManager(Managers.getDefaultHistory(), file);
+            taskManager2.createTask(task);
+        }, "Отсутствие файла должно приводить к исключению");
+    }
+
+    @DisplayName("Отсутствует файл при чтении данных")
+    @Test
+    void openFileException() {
+        assertThrows(ManagerSaveException.class, () -> {
+            file = Path.of("test").toFile();
+            taskManagerFromFile = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
+        }, "Отсутствие файла должно приводить к исключению");
+    }
+
+
 }
