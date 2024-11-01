@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileBackedTaskManagerTest extends TaskManagerTest {
+public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     private TaskManager taskManagerFromFile;
     private File file;
 
@@ -26,17 +26,7 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
     public void beforeEach() throws IOException {
         file = File.createTempFile("storage", ".csv");
         taskManager = FileBackedTaskManager.loadFromFile(Managers.getDefaultHistory(), file);
-
-        task1 = new Task("Название таски 1", "Описание таски 1",
-                LocalDateTime.parse("2024-10-24T21:00:00"), 1440);   //id==1
-        taskManager.createTask(task1);
-
-        epic1 = new Epic("Название эпика 1", "Описание эпика 1");   //id==2
-        taskManager.createEpic(epic1);
-
-        subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1",
-                epic1.getId(), LocalDateTime.parse("2024-10-20T20:00:00"), 55);    //id==3
-        taskManager.createSubtask(subtask1);
+        createTasks();
     }
 
     @AfterEach
@@ -104,31 +94,10 @@ public class FileBackedTaskManagerTest extends TaskManagerTest {
 
         assertEquals(3, tasks.size() + epics.size() + subtasks.size(), "Количество задач некорректно");
 
-        assertEquals(super.task1.getId(), tasks.getFirst().getId(), "id задачи некорректен");
-        assertEquals(super.task1.getTitle(), tasks.getFirst().getTitle(), "Название задачи некорректно");
-        assertEquals(super.task1.getStatus(), tasks.getFirst().getStatus(), "Статус задачи некорректен");
-        assertEquals(super.task1.getDescription(), tasks.getFirst().getDescription(), "Описание задачи некорректно");
-        assertEquals(super.task1.getStartTime(), tasks.getFirst().getStartTime(), "Дата старта некорректна");
-        assertEquals(super.task1.getDuration(), tasks.getFirst().getDuration(), "Срок выполнения некорректен");
-
-        assertEquals(super.epic1.getId(), epics.getFirst().getId(), "id эпика некорректен");
-        assertEquals(super.epic1.getTitle(), epics.getFirst().getTitle(), "Название эпика некорректно");
-        assertEquals(super.epic1.getStatus(), epics.getFirst().getStatus(), "Статус эпика некорректен");
-        assertEquals(super.epic1.getDescription(), epics.getFirst().getDescription(), "Описание эпика некорректно");
-        assertEquals(super.epic1.getStartTime(), epics.getFirst().getStartTime(), "Дата старта некорректна");
-        assertEquals(super.epic1.getDuration(), epics.getFirst().getDuration(), "Срок выполнения некорректен");
-        assertEquals(super.epic1.getEndTime(), epics.getFirst().getEndTime(), "Дата окончания некорректна");
-
-        assertEquals(super.subtask1.getId(), subtasks.getFirst().getId(), "id подзадачи некорректен");
-        assertEquals(super.subtask1.getTitle(), subtasks.getFirst().getTitle(), "Название подзадачи некорректно");
-        assertEquals(super.subtask1.getStatus(), subtasks.getFirst().getStatus(), "Статус задачи некорректен");
-        assertEquals(super.subtask1.getDescription(), subtasks.getFirst().getDescription(), "Описание подзадачи некорректно");
-        assertEquals(super.subtask1.getEpicId(), subtasks.getFirst().getEpicId(), "id эпика некорректно");
-        assertEquals(super.subtask1.getStartTime(), subtasks.getFirst().getStartTime(), "Дата старта некорректна");
-        assertEquals(super.subtask1.getDuration(), subtasks.getFirst().getDuration(), "Срок выполнения некорректен");
-
-        assertEquals(2, taskManagerFromFile.getPrioritizedTasks().size(), "Список приоритетных задач некорректен");
-        assertEquals(3, taskManagerFromFile.getPrioritizedTasks().getFirst().getId(), "Список приоритетных задач некорректен");
+        assertArrayEquals(taskManager.getAllTask().toArray(), taskManagerFromFile.getAllTask().toArray());
+        assertArrayEquals(taskManager.getAllEpic().toArray(), taskManagerFromFile.getAllEpic().toArray());
+        assertArrayEquals(taskManager.getAllSubtask().toArray(), taskManagerFromFile.getAllSubtask().toArray());
+        assertArrayEquals(taskManager.getPrioritizedTasks().toArray(), taskManagerFromFile.getPrioritizedTasks().toArray());
     }
 
     @DisplayName("Сохранение и чтение данных в файл")

@@ -12,11 +12,24 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-abstract class TaskManagerTest {
-    TaskManager taskManager;
+abstract class TaskManagerTest<T extends TaskManager> {
+    T taskManager;
     Task task1;
     Epic epic1;
     Subtask subtask1;
+
+    protected void createTasks() {
+        task1 = new Task("Название таски 1", "Описание таски 1",
+                LocalDateTime.parse("2024-10-24T21:00:00"), 24 * 60);   //id==1
+        taskManager.createTask(task1);
+
+        epic1 = new Epic("Название эпика 1", "Описание эпика 1");   //id==2
+        taskManager.createEpic(epic1);
+
+        subtask1 = new Subtask("Название сабтаски 1", "Описание сабтаски 1",
+                epic1.getId(), LocalDateTime.parse("2024-10-20T20:00:00"), 24 * 60);    //id==3
+        taskManager.createSubtask(subtask1);
+    }
 
     @DisplayName("Создание задачи")
     @Test
