@@ -103,9 +103,6 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
         } catch (ValidationException e) {
             System.err.println(e.getMessage());
             sendHasInteractions(exchange);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            sendError(exchange);
         }
     }
 

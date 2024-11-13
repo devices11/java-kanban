@@ -29,16 +29,10 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
     private void handleGetHistory(HttpExchange exchange) throws IOException {
         System.out.println(LocalDateTime.now() + " ---> Получен запрос " + exchange.getRequestMethod() + " "
                 + exchange.getRequestURI());
-        try {
-            String json = gson.toJson(taskManager.getHistory());
 
-            System.out.println(LocalDateTime.now() + " <--- Сформирован ответ:");
-            sendText(exchange, json);
-            System.out.println("Body: " + json);
-
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            sendError(exchange);
-        }
+        String json = gson.toJson(taskManager.getHistory());
+        System.out.println(LocalDateTime.now() + " <--- Сформирован ответ:");
+        sendText(exchange, json);
+        System.out.println("Body: " + json);
     }
 }

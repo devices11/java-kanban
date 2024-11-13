@@ -38,7 +38,7 @@ public class TaskManagerSubtasksTest {
         manager.deleteAllTask();
         manager.deleteAllSubtask();
         manager.deleteAllEpic();
-        HttpTaskServer.start();
+        taskServer.start();
 
         Epic epic = new Epic("Название эпика 1", "Описание эпика 1");
         String epicJson = gson.toJson(epic);

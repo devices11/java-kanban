@@ -31,11 +31,11 @@ public class TaskManagerTasksTest {
     Gson gson = BaseHttpHandler.getGson();
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         manager.deleteAllTask();
         manager.deleteAllSubtask();
         manager.deleteAllEpic();
-        HttpTaskServer.start();
+        taskServer.start();
     }
 
     @AfterEach
