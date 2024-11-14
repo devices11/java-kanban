@@ -4,6 +4,8 @@ import main.models.Epic;
 import main.models.Subtask;
 import main.models.Task;
 import main.service.TaskManager;
+import main.util.Exception.NotFoundException;
+import main.util.Exception.ValidationException;
 import main.util.StatusModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -129,11 +131,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void updateTaskIdNotExist() {
         Task taskForUpdate = new Task("Название таски 2", "Описание таски 2");
         taskForUpdate.setId(2);
-        taskManager.updateTask(taskForUpdate);
+        assertThrows(NotFoundException.class, () -> taskManager.updateTask(taskForUpdate)
+                , "Отсутствие задачи должно приводить к исключению");
 
         assertEquals(task1.getTitle(), taskManager.getTaskById(1).getTitle(), "Задача не должна быть изменена");
         assertEquals(task1.getDescription(), taskManager.getTaskById(1).getDescription(), "Задача не должна быть изменена");
         assertEquals(1, taskManager.getAllTask().size(), "Неверное количество задач");
+
+
     }
 
     @DisplayName("Обновление эпика")
@@ -347,14 +352,16 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void creatingTasksWithIntersection() {
         Task task2 = new Task("Название задачи 2", "Описание задачи 2",
                 LocalDateTime.parse("2024-10-25T20:00:01"), 12 * 60);
-        taskManager.createTask(task2);
+        assertThrows(ValidationException.class, () -> taskManager.createTask(task2)
+                , "Пересечение задач должно приводить к исключению");
+
         Task task3 = new Task("Название задачи 3", "Описание задачи 3",
                 LocalDateTime.parse("2024-10-20T19:00:01"), 12 * 60);
-        taskManager.createTask(task3);
+        assertThrows(ValidationException.class, () -> taskManager.createTask(task3)
+                , "Пересечение задач должно приводить к исключению");
 
         assertEquals(1, taskManager.getAllTask().size(), "Задача не одна");
         assertEquals(task1, taskManager.getTaskById(1), "Список задач некорректен");
     }
-
 
 }

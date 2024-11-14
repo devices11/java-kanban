@@ -7,6 +7,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static main.util.StatusModel.NEW;
+
 public class Task {
     private String title;
     private String description;
@@ -16,15 +18,11 @@ public class Task {
     private LocalDateTime startTime;
 
     public Task(String title, String description) {
-        this.status = StatusModel.NEW;
-        this.title = title;
-        this.description = description;
-        this.duration = Duration.ZERO;
-        this.startTime = null;
+        this(title, description, null, 0);
     }
 
     public Task(String title, String description, LocalDateTime startTime, int durationOfMinutes) {
-        this.status = StatusModel.NEW;
+        this.status = NEW;
         this.title = title;
         this.description = description;
         this.duration = Duration.ofMinutes(durationOfMinutes);
